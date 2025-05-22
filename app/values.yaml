@@ -1,0 +1,20 @@
+
+host: p2-server.devops.vuhuydiet.xyz
+namespace:
+
+docker-image:
+  - name: config-server
+    image: springcommunity/spring-petclinic-config-server
+    tag: 1.0.0
+  - name: discovery-server
+    image: springcommunity/spring-petclinic-discovery-server
+    tag: 1.0.0
+  - name: visits-service
+    image: springcommunity/spring-petclinic-visits-service
+    tag: 1.0.0
+  - name: vets-service
+    image: springcommunity/spring-petclinic-vets-service
+    tag: 1.0.0
+  - name: api-gateway
+    image: springcommunity/spring-petclinic-api-gateway
+    tag: 1.0.0
