@@ -1,3 +1,4 @@
+host: staging-p2.devops.vuhuydiet.com
 
 configServer:
   image:

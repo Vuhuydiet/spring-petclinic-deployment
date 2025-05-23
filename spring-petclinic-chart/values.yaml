@@ -1,5 +1,4 @@
-
-host: p2-server.devops.vuhuydiet.xyz
+host: undefined
 
 namespaces:
 - dev
