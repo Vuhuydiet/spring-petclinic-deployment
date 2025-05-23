@@ -15,3 +15,5 @@ spec:
         backend:
           service:
             name: "api-gateway"
+            port:
+              number: {{ .Values.apiGateway.port }}
