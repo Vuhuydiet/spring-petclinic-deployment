@@ -22,7 +22,7 @@ spec:
         command:
         - sh
         - -c 
-        - until nc -z {{ .Values.discoveryServer.name }} {{ .Values.discoveryServer.port }}; do echo waiting for config-server; sleep 2; done;
+        - until nc -z {{ $.Values.discoveryServer.name }} {{ $.Values.discoveryServer.port }}; do echo waiting for config-server; sleep 2; done;
 
       containers:
       - name: {{ $service.name }}

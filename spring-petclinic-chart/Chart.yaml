@@ -2,5 +2,5 @@ apiVersion: v2
 name: spring-petclinic
 description: A Helm chart for Kubernetes for the Spring Petclinic Microservices application
 type: application
-version: 0.1.0
+version: 0.1.13
 appVersion: "1.0.0"
