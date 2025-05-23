@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: spring-petclinic
+  name: spring-petclinic-dev
   namespace: argocd
 spec:
   project: default
@@ -12,6 +12,7 @@ spec:
     path: spring-petclinic-chart
     helm:
       valueFiles:
+      - values.yaml
       - environments/values-dev.yaml
 
   destination:
@@ -30,7 +31,7 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: spring-petclinic
+  name: spring-petclinic-staging
   namespace: argocd
 spec:
   project: default
@@ -41,6 +42,7 @@ spec:
     path: spring-petclinic-chart
     helm:
       valueFiles:
+      - values.yaml
       - environments/values-staging.yaml
 
   destination:
