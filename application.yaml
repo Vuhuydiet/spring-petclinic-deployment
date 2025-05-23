@@ -13,7 +13,7 @@ spec:
     helm:
       valueFiles:
       - values.yaml
-      - environments/values-dev.yaml
+      - environments/dev/values.yaml
 
   destination:
     server: https://kubernetes.default.svc
@@ -43,7 +43,7 @@ spec:
     helm:
       valueFiles:
       - values.yaml
-      - environments/values-staging.yaml
+      - environments/staging/values.yaml
 
   destination:
     server: https://kubernetes.default.svc
