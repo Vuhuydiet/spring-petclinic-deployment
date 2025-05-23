@@ -25,7 +25,7 @@ spec:
 
       containers:
       - name: {{ .Values.discoveryServer.name }}
-        image: "{{ .Values.discoveryServer.image }}:{{ .Values.discoveryServer.image.tag }}"
+        image: "{{ .Values.discoveryServer.image.name }}:{{ .Values.discoveryServer.image.tag }}"
         ports:
         - containerPort: 8761
         env:
