@@ -1,0 +1,48 @@
+# Admin Server deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.adminServer.name }}
+  labels:
+    app: {{ .Values.adminServer.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.adminServer.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.adminServer.name }}
+    spec:
+      initContainers:
+      - name: wait-for-discovery-server
+        image: busybox
+        command:
+        - sh
+        - -c 
+        - until nc -z {{ .Values.discoveryServer.name }} {{ .Values.discoveryServer.port }}; do echo waiting for config-server; sleep 2; done;
+
+      containers:
+      - name: {{ .Values.adminServer.name }}
+        image: "{{ .Values.adminServer.image.name }}:{{ .Values.adminServer.image.tag }}"
+        ports:
+        - containerPort: {{ .Values.adminServer.port }}
+        env:
+        - name: CONFIG_SERVER_URL
+          value: "http://{{ .Values.configServer.name }}:{{ .Values.configServer.port }}"
+        - name: EUREKA_INSTANCE_HOSTNAME
+          value: {{ .Values.adminServer.name }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.adminServer.name }}
+spec:
+  selector:
+    app: {{ .Values.adminServer.name }}
+  ports:
+  - protocol: TCP
+    port: {{ .Values.adminServer.port }}
+    targetPort: {{ .Values.adminServer.targetPort }}
+  type: {{ .Values.adminServer.serviceType}}

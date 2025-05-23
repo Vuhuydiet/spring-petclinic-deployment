@@ -1,0 +1,55 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: spring-petclinic
+  namespace: argocd
+spec:
+  project: default
+  
+  source: 
+    repoURL: https://github.com/Vuhuydiet/spring-petclinic-deployment
+    targetRevision: HEAD
+    path: spring-petclinic-chart
+    helm:
+      valueFiles:
+      - environments/values-dev.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dev
+  
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+    automated:
+      selfHeal: true
+      prune: true
+
+---
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: spring-petclinic
+  namespace: argocd
+spec:
+  project: default
+  
+  source: 
+    repoURL: https://github.com/Vuhuydiet/spring-petclinic-deployment
+    targetRevision: HEAD
+    path: spring-petclinic-chart
+    helm:
+      valueFiles:
+      - environments/values-staging.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: staging
+  
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+    automated:
+      selfHeal: true
+      prune: true

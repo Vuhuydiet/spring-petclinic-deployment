@@ -1,0 +1,46 @@
+# Discovery Server (Eureka) deployment - must be deployed second
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.discoveryServer.name }}
+  labels:
+    app: {{ .Values.discoveryServer.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.discoveryServer.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.discoveryServer.name }}
+    spec:
+      initContainers:
+      - name: wait-for-config-server
+        image: busybox
+        command:
+        - sh
+        - -c 
+        - until nc -z {{ .Values.configServer.name }} {{ .Values.configServer.port }}; do echo waiting for config-server; sleep 2; done;
+
+      containers:
+      - name: {{ .Values.discoveryServer.name }}
+        image: "{{ .Values.discoveryServer.image }}:{{ .Values.discoveryServer.image.tag }}"
+        ports:
+        - containerPort: 8761
+        env:
+        - name: CONFIG_SERVER_URL
+          value: "http://{{ .Values.configServer.name }}:{{ .Values.configServer.port }}"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.discoveryServer.name }}
+spec:
+  selector:
+    app: {{ .Values.discoveryServer.name }}
+  ports:
+  - protocol: TCP
+    port: {{ .Values.discoveryServer.port }}
+    targetPort: {{ .Values.discoveryServer.targetPort }}
+  type: {{ .Values.discoveryServer.serviceType}}

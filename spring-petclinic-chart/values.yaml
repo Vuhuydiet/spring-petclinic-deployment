@@ -1,0 +1,70 @@
+
+host: p2-server.devops.vuhuydiet.xyz
+
+namespaces:
+- dev
+- staging
+
+configServer:
+  name: config-server
+  image:
+    name: vuhuydiet/spring-petclinic-config-server
+    tag: latest
+  port: 8888
+  targetPort: 8888
+  serviceType: ClusterIP
+
+discoveryServer:
+  name: discovery-server
+  image: 
+    name: vuhuydiet/spring-petclinic-discovery-server
+    tag: latest
+  port: 8761
+  targetPort: 8761
+  serviceType: ClusterIP
+
+apiGateway:
+  name: api-gateway
+  image: 
+    name: vuhuydiet/spring-petclinic-api-gateway
+    tag: latest
+  port: 8080
+  targetPort: 8080
+  serviceType: ClusterIP
+
+adminServer:
+  name: admin-server
+  image: 
+    name: vuhuydiet/spring-petclinic-admin-server
+    tag: latest
+  port: 9090
+  targetPort: 9090
+  serviceType: ClusterIP
+
+services:
+  customerService:
+    name: customer-service
+    image: 
+      name: vuhuydiet/spring-petclinic-customer-service
+      tag: latest
+    port: 8081
+    targetPort: 8081
+    serviceType: ClusterIP
+
+  visitsService:
+    name: visits-service
+    image: 
+      name: vuhuydiet/spring-petclinic-visits-service
+      tag: latest
+    port: 8082
+    targetPort: 8082
+    serviceType: ClusterIP
+
+  vetsService:
+    name: vets-service
+    image:
+      name: vuhuydiet/spring-petclinic-vets-service
+      tag: latest
+    port: 8083
+    targetPort: 8083
+    serviceType: ClusterIP

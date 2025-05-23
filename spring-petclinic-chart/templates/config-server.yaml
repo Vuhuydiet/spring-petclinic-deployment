@@ -1,0 +1,35 @@
+# Config Server deployment - must be deployed first
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.configServer.name }}
+  labels:
+    app: {{ .Values.configServer.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.configServer.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.configServer.name }}
+    spec:
+      containers:
+      - name: {{ .Values.configServer.name }}
+        image: "{{ .Values.configServer.image }}:{{ .Values.configServer.image.tag }}"
+        ports:
+        - containerPort: {{ .Values.configServer.port }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.configServer.name }}
+spec:
+  selector:
+    app: {{ .Values.configServer.name }}
+  ports:
+  - protocol: TCP
+    port: {{ .Values.configServer.port }}
+    targetPort: {{ .Values.configServer.targetPort }}
+  type: {{ .Values.configServer.serviceType}}

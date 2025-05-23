@@ -1,0 +1,29 @@
+
+configServer:
+  image:
+    tag: latest
+
+discoveryServer:
+  image:
+    tag: latest
+
+apiGateway:
+  image:
+    tag: latest
+
+adminServer:
+  image:
+    tag: latest
+
+services:
+  customerService:
+    image:
+      tag: latest
+
+  visitsService:
+    image:
+      tag: latest
+
+  vetsService:
+    image:
+      tag: latest

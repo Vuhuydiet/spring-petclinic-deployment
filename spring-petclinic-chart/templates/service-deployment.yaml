@@ -1,0 +1,51 @@
+{{- range $name, $service := .Values.services }}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: 
+  labels:
+    app: {{ $service.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ $service.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $service.name }}
+    spec:
+      initContainers:
+      - name: wait-for-discovery-server
+        image: busybox
+        command:
+        - sh
+        - -c 
+        - until nc -z {{ .Values.discoveryServer.name }} {{ .Values.discoveryServer.port }}; do echo waiting for config-server; sleep 2; done;
+
+      containers:
+      - name: {{ $service.name }}
+        image: "{{ $service.image.name }}:{{ $service.image.tag }}"
+        ports:
+        - containerPort: {{ $service.port }}
+        env:
+        - name: CONFIG_SERVER_URL
+          value: "http://{{ .Values.configServer.name }}:{{ .Values.configServer.port }}"
+        - name: EUREKA_INSTANCE_HOSTNAME
+          value: {{ $service.name}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $service.name }}
+spec:
+  selector:
+    app: {{ $service.name }}
+  ports:
+  - protocol: TCP
+    port: {{ $service.port }}
+    targetPort: {{ $service.targetPort }}
+  type: {{ $service.serviceType}}
+
+{{- end }}

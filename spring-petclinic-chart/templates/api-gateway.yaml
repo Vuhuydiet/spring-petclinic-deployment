@@ -1,0 +1,48 @@
+# API Gateway deployment - must be deployed last
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.apiGateway.name }}
+  labels:
+    app: {{ .Values.apiGateway.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.apiGateway.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.apiGateway.name }}
+    spec:
+      initContainers:
+      - name: wait-for-discovery-server
+        image: busybox
+        command:
+        - sh
+        - -c 
+        - until nc -z {{ .Values.discoveryServer.name }} {{ .Values.discoveryServer.port }}; do echo waiting for config-server; sleep 2; done;
+
+      containers:
+      - name: {{ .Values.apiGateway.name }}
+        image: "{{ .Values.apiGateway.image.name }}:{{ .Values.apiGateway.image.tag }}"
+        ports:
+        - containerPort: {{ .Values.apiGateway.port }}
+        env:
+        - name: CONFIG_SERVER_URL
+          value: "http://{{ .Values.configServer.name }}:{{ .Values.configServer.port }}"
+        - name: EUREKA_INSTANCE_HOSTNAME
+          value: {{ .Values.apiGateway.name }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.apiGateway.name }}
+spec:
+  selector:
+    app: {{ .Values.apiGateway.name }}
+  ports:
+  - protocol: TCP
+    port: {{ .Values.apiGateway.port }}
+    targetPort: {{ .Values.apiGateway.targetPort }}
+  type: {{ .Values.apiGateway.serviceType}}
