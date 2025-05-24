@@ -41,7 +41,7 @@ adminServer:
   serviceType: ClusterIP
 
 services:
-- customersService:
+  customersService:
     name: customers-service
     image: 
       name: vuhuydiet/spring-petclinic-customers-service
@@ -49,7 +49,7 @@ services:
     port: 8081
     targetPort: 8081
     serviceType: ClusterIP
-- visitsService:
+  visitsService:
     name: visits-service
     image: 
       name: vuhuydiet/spring-petclinic-visits-service
@@ -58,7 +58,7 @@ services:
     targetPort: 8082
     serviceType: ClusterIP
 
-- vetsService:
+  vetsService:
     name: vets-service
     image:
       name: vuhuydiet/spring-petclinic-vets-service
