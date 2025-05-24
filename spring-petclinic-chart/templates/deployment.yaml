@@ -34,18 +34,5 @@ spec:
           value: "http://{{ $.Values.configServer.name }}:{{ $.Values.configServer.port }}"
         - name: EUREKA_INSTANCE_HOSTNAME
           value: {{ $service.name}}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ $service.name }}
-spec:
-  selector:
-    app: {{ $service.name }}
-  ports:
-  - protocol: TCP
-    port: {{ $service.port }}
-    targetPort: {{ $service.targetPort }}
-  type: {{ $service.serviceType}}
 
 {{- end }}
