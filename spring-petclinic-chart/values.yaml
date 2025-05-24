@@ -42,7 +42,7 @@ adminServer:
 
 services:
   customersService:
-    name: customer-service
+    name: customers-service
     image: 
       name: vuhuydiet/spring-petclinic-customer-service
       tag: latest
