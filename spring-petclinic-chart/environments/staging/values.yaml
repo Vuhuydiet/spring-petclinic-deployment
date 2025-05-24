@@ -1,4 +1,4 @@
-host: staging-p2.devops.vuhuydiet.xyz
+host: staging.devops.vuhuydiet.xyz
 
 configServer:
   image:

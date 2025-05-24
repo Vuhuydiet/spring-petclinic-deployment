@@ -17,3 +17,14 @@ spec:
             name: "api-gateway"
             port:
               number: {{ .Values.apiGateway.port }}
+  - host: admin.{{ .Values.host }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: "admin-server"
+            port:
+              number: {{ .Values.adminServer.port }}
+    
