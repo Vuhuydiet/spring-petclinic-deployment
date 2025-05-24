@@ -44,7 +44,7 @@ services:
   customersService:
     name: customers-service
     image: 
-      name: vuhuydiet/spring-petclinic-customer-service
+      name: vuhuydiet/spring-petclinic-customers-service
       tag: latest
     port: 8081
     targetPort: 8081
