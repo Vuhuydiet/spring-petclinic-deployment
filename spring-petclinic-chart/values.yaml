@@ -41,7 +41,7 @@ adminServer:
   serviceType: ClusterIP
 
 services:
-  customerService:
+  customersService:
     name: customer-service
     image: 
       name: vuhuydiet/spring-petclinic-customer-service

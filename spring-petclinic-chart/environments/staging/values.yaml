@@ -17,7 +17,7 @@ adminServer:
     tag: latest
 
 services:
-  customerService:
+  customersService:
     image:
       tag: latest
 

@@ -12,15 +12,12 @@ adminServer:
   image:
     tag: d8ba567
 services:
-  customerService:
+  customersService:
     image:
-      tag: latest
+      tag: d8ba567
   visitsService:
     image:
       tag: d8ba567
   vetsService:
-    image:
-      tag: d8ba567
-  customersService:
     image:
       tag: d8ba567
