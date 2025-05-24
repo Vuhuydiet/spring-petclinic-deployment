@@ -10,16 +10,6 @@ spec:
   - host: {{ .Values.host }}
     http:
       paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: "api-gateway"
-            port:
-              number: {{ .Values.apiGateway.port }}
-  - host: {{ .Values.host }}
-    http:
-      paths:
       - path: /admin
         pathType: Prefix
         backend:
@@ -27,4 +17,11 @@ spec:
             name: "admin-server"
             port:
               number: {{ .Values.adminServer.port }}
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: "api-gateway"
+            port:
+              number: {{ .Values.apiGateway.port }}
     
