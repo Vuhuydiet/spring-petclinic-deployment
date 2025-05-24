@@ -47,5 +47,5 @@ spec:
     port: {{ $service.port }}
     targetPort: {{ $service.targetPort }}
   type: {{ $service.serviceType}}
-
+---
 {{- end }}
