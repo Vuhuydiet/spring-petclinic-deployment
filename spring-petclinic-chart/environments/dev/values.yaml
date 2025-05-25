@@ -1,23 +1,23 @@
 host: dev.devops.vuhuydiet.xyz
 configServer:
   image:
-    tag: 0fc0f62
+    tag: 325e757
 discoveryServer:
   image:
-    tag: 0fc0f62
+    tag: 325e757
 apiGateway:
   image:
-    tag: 0fc0f62
+    tag: 325e757
 adminServer:
   image:
-    tag: 0fc0f62
+    tag: 325e757
 services:
   customersService:
     image:
-      tag: 0fc0f62
+      tag: 325e757
   visitsService:
     image:
-      tag: 0fc0f62
+      tag: 325e757
   vetsService:
     image:
-      tag: 0fc0f62
+      tag: 325e757
