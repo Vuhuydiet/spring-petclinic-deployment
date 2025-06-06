@@ -57,6 +57,12 @@ spec:
       labels:
         app: {{ .Values.observability.loki.name }}
     spec:
+      {{- if .Values.observability.tolerateMemoryPressure }}
+      tolerations:
+      - key: node.kubernetes.io/memory-pressure
+        operator: Exists
+        effect: NoSchedule
+      {{- end }}
       containers:
       - name: {{ .Values.observability.loki.name }}
         image: "{{ .Values.observability.loki.image.name }}:{{ .Values.observability.loki.image.tag }}"
@@ -70,12 +76,16 @@ spec:
         - name: loki-storage
           mountPath: /loki
         resources:
+          {{- if .Values.observability.loki.resources }}
+          {{- toYaml .Values.observability.loki.resources | nindent 10 }}
+          {{- else }}
           requests:
             memory: "256Mi"
             cpu: "100m"
           limits:
             memory: "512Mi"
             cpu: "250m"
+          {{- end }}
         livenessProbe:
           httpGet:
             path: /ready

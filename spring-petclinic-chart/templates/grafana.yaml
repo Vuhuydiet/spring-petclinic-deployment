@@ -315,6 +315,12 @@ spec:
       labels:
         app: {{ .Values.observability.grafana.name }}
     spec:
+      {{- if .Values.observability.tolerateMemoryPressure }}
+      tolerations:
+      - key: node.kubernetes.io/memory-pressure
+        operator: Exists
+        effect: NoSchedule
+      {{- end }}
       containers:
       - name: {{ .Values.observability.grafana.name }}
         image: "{{ .Values.observability.grafana.image.name }}:{{ .Values.observability.grafana.image.tag }}"
@@ -337,12 +343,16 @@ spec:
         - name: grafana-storage
           mountPath: /var/lib/grafana
         resources:
+          {{- if .Values.observability.grafana.resources }}
+          {{- toYaml .Values.observability.grafana.resources | nindent 10 }}
+          {{- else }}
           requests:
             memory: "256Mi"
             cpu: "100m"
           limits:
             memory: "512Mi"
             cpu: "250m"
+          {{- end }}
         livenessProbe:
           httpGet:
             path: /api/health

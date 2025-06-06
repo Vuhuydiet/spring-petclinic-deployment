@@ -1,10 +1,37 @@
 host: dev.devops.vuhuydiet.xyz
 
-# Observability configuration for dev environment
+# Observability configuration for dev environment - Ultra minimal for resource-constrained cluster
 observability:
   useEmptyDirVolumes: true  # Use emptyDir for dev to avoid PVC issues
   grafana:
     serviceType: NodePort  # Use NodePort for dev environment
+  # Ultra-minimal resource requirements for dev environment
+  prometheus:
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "25m"
+      limits:
+        memory: "128Mi"
+        cpu: "50m"
+  loki:
+    resources:
+      requests:
+        memory: "32Mi"
+        cpu: "10m"
+      limits:
+        memory: "64Mi"
+        cpu: "25m"
+  grafana:
+    resources:
+      requests:
+        memory: "32Mi"
+        cpu: "10m"
+      limits:
+        memory: "64Mi"
+        cpu: "25m"
+  # Enable tolerations for memory pressure
+  tolerateMemoryPressure: true
 
 configServer:
   image:

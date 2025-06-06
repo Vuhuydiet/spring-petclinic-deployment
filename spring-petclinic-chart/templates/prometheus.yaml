@@ -103,6 +103,12 @@ spec:
       labels:
         app: {{ .Values.observability.prometheus.name }}
     spec:
+      {{- if .Values.observability.tolerateMemoryPressure }}
+      tolerations:
+      - key: node.kubernetes.io/memory-pressure
+        operator: Exists
+        effect: NoSchedule
+      {{- end }}
       containers:
       - name: {{ .Values.observability.prometheus.name }}
         image: "{{ .Values.observability.prometheus.image.name }}:{{ .Values.observability.prometheus.image.tag }}"
@@ -121,12 +127,16 @@ spec:
         - name: prometheus-storage
           mountPath: /prometheus/
         resources:
+          {{- if .Values.observability.prometheus.resources }}
+          {{- toYaml .Values.observability.prometheus.resources | nindent 10 }}
+          {{- else }}
           requests:
             memory: "512Mi"
             cpu: "250m"
           limits:
             memory: "1Gi"
             cpu: "500m"
+          {{- end }}
         livenessProbe:
           httpGet:
             path: /-/healthy
