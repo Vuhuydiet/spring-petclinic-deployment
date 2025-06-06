@@ -33,6 +33,19 @@ spec:
           value: "http://{{ .Values.configServer.name }}:{{ .Values.configServer.port }}"
         - name: EUREKA_INSTANCE_HOSTNAME
           value: {{ .Values.adminServer.name }}
+        # Observability configuration
+        - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
+          value: "health,info,prometheus,metrics"
+        - name: MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS
+          value: "always"
+        - name: MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED
+          value: "true"
+        - name: MANAGEMENT_TRACING_SAMPLING_PROBABILITY
+          value: "1.0"
+        - name: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
+          value: "http://{{ .Values.observability.zipkin.name }}:{{ .Values.observability.zipkin.port }}/api/v2/spans"
+        - name: LOGGING_PATTERN_CONSOLE
+          value: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
 ---
 apiVersion: v1
 kind: Service
