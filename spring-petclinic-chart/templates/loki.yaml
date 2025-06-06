@@ -75,17 +75,17 @@ spec:
           mountPath: /etc/loki
         - name: loki-storage
           mountPath: /loki
-        resources:
-          {{- if .Values.observability.loki.resources }}
-          {{- toYaml .Values.observability.loki.resources | nindent 10 }}
-          {{- else }}
-          requests:
-            memory: "256Mi"
-            cpu: "100m"
-          limits:
-            memory: "512Mi"
-            cpu: "250m"
-          {{- end }}
+        # resources:
+        #   {{- if .Values.observability.loki.resources }}
+        #   {{- toYaml .Values.observability.loki.resources | nindent 10 }}
+        #   {{- else }}
+        #   requests:
+        #     memory: "256Mi"
+        #     cpu: "100m"
+        #   limits:
+        #     memory: "512Mi"
+        #     cpu: "250m"
+        #   {{- end }}
         livenessProbe:
           httpGet:
             path: /ready

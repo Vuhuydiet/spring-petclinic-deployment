@@ -126,17 +126,17 @@ spec:
           mountPath: /etc/prometheus/
         - name: prometheus-storage
           mountPath: /prometheus/
-        resources:
-          {{- if .Values.observability.prometheus.resources }}
-          {{- toYaml .Values.observability.prometheus.resources | nindent 10 }}
-          {{- else }}
-          requests:
-            memory: "512Mi"
-            cpu: "250m"
-          limits:
-            memory: "1Gi"
-            cpu: "500m"
-          {{- end }}
+        # resources:
+        #   {{- if .Values.observability.prometheus.resources }}
+        #   {{- toYaml .Values.observability.prometheus.resources | nindent 10 }}
+        #   {{- else }}
+        #   requests:
+        #     memory: "512Mi"
+        #     cpu: "250m"
+        #   limits:
+        #     memory: "1Gi"
+        #     cpu: "500m"
+        #   {{- end }}
         livenessProbe:
           httpGet:
             path: /-/healthy

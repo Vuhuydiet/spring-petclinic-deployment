@@ -342,17 +342,17 @@ spec:
           mountPath: /var/lib/grafana/dashboards
         - name: grafana-storage
           mountPath: /var/lib/grafana
-        resources:
-          {{- if .Values.observability.grafana.resources }}
-          {{- toYaml .Values.observability.grafana.resources | nindent 10 }}
-          {{- else }}
-          requests:
-            memory: "256Mi"
-            cpu: "100m"
-          limits:
-            memory: "512Mi"
-            cpu: "250m"
-          {{- end }}
+        # resources:
+        #   {{- if .Values.observability.grafana.resources }}
+        #   {{- toYaml .Values.observability.grafana.resources | nindent 10 }}
+        #   {{- else }}
+        #   requests:
+        #     memory: "256Mi"
+        #     cpu: "100m"
+        #   limits:
+        #     memory: "512Mi"
+        #     cpu: "250m"
+        #   {{- end }}
         livenessProbe:
           httpGet:
             path: /api/health
