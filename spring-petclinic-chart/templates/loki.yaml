@@ -1,0 +1,111 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.observability.loki.name }}-config
+  namespace: {{ .Values.namespaces | first }}
+data:
+  local-config.yaml: |
+    auth_enabled: false
+    
+    server:
+      http_listen_port: 3100
+      grpc_listen_port: 9096
+    
+    common:
+      path_prefix: /loki
+      storage:
+        filesystem:
+          chunks_directory: /loki/chunks
+          rules_directory: /loki/rules
+      replication_factor: 1
+      ring:
+        instance_addr: 127.0.0.1
+        kvstore:
+          store: inmemory
+    
+    schema_config:
+      configs:
+        - from: 2020-10-24
+          store: boltdb-shipper
+          object_store: filesystem
+          schema: v11
+          index:
+            prefix: index_
+            period: 24h
+    
+    ruler:
+      alertmanager_url: http://localhost:9093
+    
+    analytics:
+      reporting_enabled: false
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.observability.loki.name }}
+  namespace: {{ .Values.namespaces | first }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.observability.loki.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.observability.loki.name }}
+    spec:
+      containers:
+      - name: {{ .Values.observability.loki.name }}
+        image: "{{ .Values.observability.loki.image.name }}:{{ .Values.observability.loki.image.tag }}"
+        ports:
+        - containerPort: {{ .Values.observability.loki.targetPort }}
+        args:
+          - -config.file=/etc/loki/local-config.yaml
+        volumeMounts:
+        - name: loki-config
+          mountPath: /etc/loki
+        - name: loki-storage
+          mountPath: /loki
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+      volumes:
+      - name: loki-config
+        configMap:
+          name: {{ .Values.observability.loki.name }}-config
+      - name: loki-storage
+        persistentVolumeClaim:
+          claimName: {{ .Values.observability.loki.name }}-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.observability.loki.name }}
+  namespace: {{ .Values.namespaces | first }}
+spec:
+  selector:
+    app: {{ .Values.observability.loki.name }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.observability.loki.port }}
+      targetPort: {{ .Values.observability.loki.targetPort }}
+  type: {{ .Values.observability.loki.serviceType }}
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.observability.loki.name }}-pvc
+  namespace: {{ .Values.namespaces | first }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.observability.loki.storage }}

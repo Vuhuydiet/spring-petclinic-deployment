@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.observability.zipkin.name }}
+  namespace: {{ .Values.namespaces | first }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.observability.zipkin.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.observability.zipkin.name }}
+    spec:
+      containers:
+      - name: {{ .Values.observability.zipkin.name }}
+        image: "{{ .Values.observability.zipkin.image.name }}:{{ .Values.observability.zipkin.image.tag }}"
+        ports:
+        - containerPort: {{ .Values.observability.zipkin.targetPort }}
+        env:
+        - name: STORAGE_TYPE
+          value: mem
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.observability.zipkin.name }}
+  namespace: {{ .Values.namespaces | first }}
+spec:
+  selector:
+    app: {{ .Values.observability.zipkin.name }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.observability.zipkin.port }}
+      targetPort: {{ .Values.observability.zipkin.targetPort }}
+  type: {{ .Values.observability.zipkin.serviceType }}

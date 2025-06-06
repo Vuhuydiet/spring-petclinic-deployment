@@ -1,0 +1,162 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.observability.prometheus.name }}-config
+  namespace: {{ .Values.namespaces | first }}
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+    
+    rule_files:
+      - "/etc/prometheus/rules/*.yml"
+    
+    alerting:
+      alertmanagers:
+        - static_configs:
+            - targets: []
+    
+    scrape_configs:
+      # Spring Boot Actuator endpoints for all services
+      - job_name: 'spring-petclinic-config-server'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: ['{{ .Values.configServer.name }}:{{ .Values.configServer.port }}']
+      
+      - job_name: 'spring-petclinic-discovery-server'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: ['{{ .Values.discoveryServer.name }}:{{ .Values.discoveryServer.port }}']
+      
+      - job_name: 'spring-petclinic-api-gateway'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: ['{{ .Values.apiGateway.name }}:{{ .Values.apiGateway.port }}']
+      
+      - job_name: 'spring-petclinic-admin-server'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: ['{{ .Values.adminServer.name }}:{{ .Values.adminServer.port }}']
+      
+      - job_name: 'spring-petclinic-customers-service'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: ['{{ .Values.services.customersService.name }}:{{ .Values.services.customersService.port }}']
+      
+      - job_name: 'spring-petclinic-visits-service'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: ['{{ .Values.services.visitsService.name }}:{{ .Values.services.visitsService.port }}']
+      
+      - job_name: 'spring-petclinic-vets-service'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: ['{{ .Values.services.vetsService.name }}:{{ .Values.services.vetsService.port }}']
+
+  alert_rules.yml: |
+    groups:
+      - name: petclinic_alerts
+        rules:
+          - alert: HighErrorRate
+            expr: sum(rate(http_server_requests_total{status=~"5.."}[30s])) > 10
+            for: 0s
+            labels:
+              severity: critical
+            annotations:
+              summary: "High 5xx error rate detected"
+              description: "More than 10 5xx errors in 30 seconds: {{ $value }}"
+          
+          - alert: ServiceDown
+            expr: up == 0
+            for: 1m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Service {{ $labels.instance }} is down"
+              description: "Service {{ $labels.instance }} has been down for more than 1 minute"
+          
+          - alert: HighLatency
+            expr: histogram_quantile(0.95, sum(rate(http_server_requests_duration_seconds_bucket[5m])) by (le)) > 0.5
+            for: 2m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High latency detected"
+              description: "95th percentile latency is above 500ms: {{ $value }}s"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.observability.prometheus.name }}
+  namespace: {{ .Values.namespaces | first }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.observability.prometheus.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.observability.prometheus.name }}
+    spec:
+      containers:
+      - name: {{ .Values.observability.prometheus.name }}
+        image: "{{ .Values.observability.prometheus.image.name }}:{{ .Values.observability.prometheus.image.tag }}"
+        ports:
+        - containerPort: {{ .Values.observability.prometheus.targetPort }}
+        args:
+          - '--config.file=/etc/prometheus/prometheus.yml'
+          - '--storage.tsdb.path=/prometheus/'
+          - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+          - '--web.console.templates=/usr/share/prometheus/consoles'
+          - '--storage.tsdb.retention.time={{ .Values.observability.prometheus.retention }}'
+          - '--web.enable-lifecycle'
+        volumeMounts:
+        - name: prometheus-config
+          mountPath: /etc/prometheus/
+        - name: prometheus-storage
+          mountPath: /prometheus/
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+      volumes:
+      - name: prometheus-config
+        configMap:
+          name: {{ .Values.observability.prometheus.name }}-config
+      - name: prometheus-storage
+        persistentVolumeClaim:
+          claimName: {{ .Values.observability.prometheus.name }}-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.observability.prometheus.name }}
+  namespace: {{ .Values.namespaces | first }}
+spec:
+  selector:
+    app: {{ .Values.observability.prometheus.name }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.observability.prometheus.port }}
+      targetPort: {{ .Values.observability.prometheus.targetPort }}
+  type: {{ .Values.observability.prometheus.serviceType }}
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.observability.prometheus.name }}-pvc
+  namespace: {{ .Values.namespaces | first }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.observability.prometheus.storage }}
