@@ -29,6 +29,8 @@ spec:
         ports:
         - containerPort: 8761
         env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "kubernetes"
         - name: CONFIG_SERVER_URL
           value: "http://{{ .Values.configServer.name }}:{{ .Values.configServer.port }}"
         # Observability configuration
