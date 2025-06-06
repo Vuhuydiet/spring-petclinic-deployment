@@ -68,6 +68,7 @@ services:
 observability:
   # Use emptyDir volumes for development/testing to avoid PVC issues
   useEmptyDirVolumes: true
+  tolerateMemoryPressure: false
   prometheus:
     name: prometheus
     image:
@@ -77,6 +78,7 @@ observability:
     targetPort: 9090
     serviceType: ClusterIP
     retention: 15d
+    storage: 8Gi
     
   grafana:
     name: grafana
@@ -88,6 +90,7 @@ observability:
     serviceType: LoadBalancer
     adminUser: admin
     adminPassword: admin123
+    storage: 2Gi
     
   loki:
     name: loki
@@ -97,6 +100,7 @@ observability:
     port: 3100
     targetPort: 3100
     serviceType: ClusterIP
+    storage: 5Gi
     
   zipkin:
     name: zipkin

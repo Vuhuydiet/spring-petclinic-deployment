@@ -171,4 +171,8 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
+  storageClassName: do-block-storage
+  resources:
+    requests:
+      storage: {{ .Values.observability.prometheus.storage | default "8Gi" }}
 {{- end }}

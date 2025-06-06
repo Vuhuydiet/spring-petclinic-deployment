@@ -391,4 +391,8 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
+  storageClassName: do-block-storage
+  resources:
+    requests:
+      storage: {{ .Values.observability.grafana.storage | default "2Gi" }}
 {{- end }}

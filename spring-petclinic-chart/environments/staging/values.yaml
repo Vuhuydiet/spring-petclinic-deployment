@@ -6,6 +6,12 @@ configServer:
 discoveryServer:
   image:
     tag: v0.0.12
+apiGateway:
+  image:
+    tag: v0.0.12
+adminServer:
+  image:
+    tag: v0.0.12
 services:
   customersService:
     image:
@@ -16,15 +22,15 @@ services:
   vetsService:
     image:
       tag: v0.0.12
-  apiGateway:
-    image:
-      tag: v0.0.12
-  adminServer:
-    image:
-      tag: v0.0.12
 
 # Observability configuration for staging environment
 observability:
-  useEmptyDirVolumes: false  # Use PVC for staging (persistent storage)
+  useEmptyDirVolumes: false  # Use PVC for persistent storage on DigitalOcean
+  tolerateMemoryPressure: true
+  prometheus:
+    storage: 6Gi  # Medium size for staging
   grafana:
-    serviceType: LoadBalancer  # Use LoadBalancer for staging
+    serviceType: LoadBalancer
+    storage: 2Gi  # Standard size for staging
+  loki:
+    storage: 4Gi  # Medium size for staging

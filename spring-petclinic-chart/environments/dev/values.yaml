@@ -23,8 +23,14 @@ services:
     image:
       tag: a15e5d0
       
-# Observability configuration for staging environment
+# Observability configuration for dev environment
 observability:
-  useEmptyDirVolumes: false  # Use PVC for staging (persistent storage)
+  useEmptyDirVolumes: false  # Use PVC for persistent storage on DigitalOcean
+  tolerateMemoryPressure: true
+  prometheus:
+    storage: 4Gi  # Smaller size for dev
   grafana:
-    serviceType: LoadBalancer  # Use LoadBalancer for staging
+    serviceType: LoadBalancer
+    storage: 1Gi  # Smaller size for dev
+  loki:
+    storage: 2Gi  # Smaller size for dev

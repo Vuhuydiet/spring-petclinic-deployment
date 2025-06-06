@@ -120,4 +120,8 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
+  storageClassName: do-block-storage
+  resources:
+    requests:
+      storage: {{ .Values.observability.loki.storage | default "5Gi" }}
 {{- end }}
