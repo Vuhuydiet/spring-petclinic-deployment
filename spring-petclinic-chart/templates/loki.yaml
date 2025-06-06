@@ -47,6 +47,8 @@ metadata:
   namespace: {{ .Values.namespaces | first }}
 spec:
   replicas: 1
+  strategy:
+    type: Recreate  # Ensures old pod is terminated before new one starts
   selector:
     matchLabels:
       app: {{ .Values.observability.loki.name }}
@@ -74,13 +76,29 @@ spec:
           limits:
             memory: "512Mi"
             cpu: "250m"
+        livenessProbe:
+          httpGet:
+            path: /ready
+            port: {{ .Values.observability.loki.targetPort }}
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: {{ .Values.observability.loki.targetPort }}
+          initialDelaySeconds: 5
+          periodSeconds: 5
       volumes:
       - name: loki-config
         configMap:
           name: {{ .Values.observability.loki.name }}-config
       - name: loki-storage
+        {{- if .Values.observability.useEmptyDirVolumes }}
+        emptyDir: {}
+        {{- else }}
         persistentVolumeClaim:
           claimName: {{ .Values.observability.loki.name }}-pvc
+        {{- end }}
 
 ---
 apiVersion: v1
@@ -97,6 +115,7 @@ spec:
       targetPort: {{ .Values.observability.loki.targetPort }}
   type: {{ .Values.observability.loki.serviceType }}
 
+{{- if not .Values.observability.useEmptyDirVolumes }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -109,3 +128,4 @@ spec:
   resources:
     requests:
       storage: {{ .Values.observability.loki.storage }}
+{{- end }}

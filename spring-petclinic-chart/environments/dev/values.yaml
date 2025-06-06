@@ -1,4 +1,11 @@
 host: dev.devops.vuhuydiet.xyz
+
+# Observability configuration for dev environment
+observability:
+  useEmptyDirVolumes: true  # Use emptyDir for dev to avoid PVC issues
+  grafana:
+    serviceType: NodePort  # Use NodePort for dev environment
+
 configServer:
   image:
     tag: a15e5d0

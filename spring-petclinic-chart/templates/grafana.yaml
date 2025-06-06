@@ -305,6 +305,8 @@ metadata:
   namespace: {{ .Values.namespaces | first }}
 spec:
   replicas: 1
+  strategy:
+    type: Recreate  # Ensures old pod is terminated before new one starts
   selector:
     matchLabels:
       app: {{ .Values.observability.grafana.name }}
@@ -341,6 +343,18 @@ spec:
           limits:
             memory: "512Mi"
             cpu: "250m"
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: {{ .Values.observability.grafana.targetPort }}
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: {{ .Values.observability.grafana.targetPort }}
+          initialDelaySeconds: 5
+          periodSeconds: 5
       volumes:
       - name: grafana-datasources
         configMap:
@@ -352,8 +366,12 @@ spec:
         configMap:
           name: {{ .Values.observability.grafana.name }}-dashboard
       - name: grafana-storage
+        {{- if .Values.observability.useEmptyDirVolumes }}
+        emptyDir: {}
+        {{- else }}
         persistentVolumeClaim:
           claimName: {{ .Values.observability.grafana.name }}-pvc
+        {{- end }}
 
 ---
 apiVersion: v1
@@ -370,6 +388,7 @@ spec:
       targetPort: {{ .Values.observability.grafana.targetPort }}
   type: {{ .Values.observability.grafana.serviceType }}
 
+{{- if not .Values.observability.useEmptyDirVolumes }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -382,3 +401,4 @@ spec:
   resources:
     requests:
       storage: {{ .Values.observability.grafana.storage }}
+{{- end }}

@@ -93,6 +93,8 @@ metadata:
   namespace: {{ .Values.namespaces | first }}
 spec:
   replicas: 1
+  strategy:
+    type: Recreate  # Ensures old pod is terminated before new one starts
   selector:
     matchLabels:
       app: {{ .Values.observability.prometheus.name }}
@@ -125,13 +127,29 @@ spec:
           limits:
             memory: "1Gi"
             cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /-/healthy
+            port: {{ .Values.observability.prometheus.targetPort }}
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /-/ready
+            port: {{ .Values.observability.prometheus.targetPort }}
+          initialDelaySeconds: 5
+          periodSeconds: 5
       volumes:
       - name: prometheus-config
         configMap:
           name: {{ .Values.observability.prometheus.name }}-config
       - name: prometheus-storage
+        {{- if .Values.observability.useEmptyDirVolumes }}
+        emptyDir: {}
+        {{- else }}
         persistentVolumeClaim:
           claimName: {{ .Values.observability.prometheus.name }}-pvc
+        {{- end }}
 
 ---
 apiVersion: v1
@@ -148,6 +166,7 @@ spec:
       targetPort: {{ .Values.observability.prometheus.targetPort }}
   type: {{ .Values.observability.prometheus.serviceType }}
 
+{{- if not .Values.observability.useEmptyDirVolumes }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -160,3 +179,4 @@ spec:
   resources:
     requests:
       storage: {{ .Values.observability.prometheus.storage }}
+{{- end }}
