@@ -111,7 +111,7 @@ data:
             {
               "expr": "sum(rate(http_server_requests_total[5m])) by (job)",
               "refId": "A",
-              "legendFormat": "{{job}}"
+              "legendFormat": "{{ "{{" }}job{{ "}}" }}"
             }
           ],
           "fieldConfig": {
@@ -132,7 +132,7 @@ data:
             {
               "expr": "sum(jvm_memory_used_bytes) by (job)",
               "refId": "A",
-              "legendFormat": "{{job}}"
+              "legendFormat": "{{ "{{" }}job{{ "}}" }}"
             }
           ],
           "fieldConfig": {
