@@ -61,6 +61,10 @@ spec:
         operator: Exists
         effect: NoSchedule
       {{- end }}
+      securityContext:
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
       containers:
       - name: {{ .Values.observability.loki.name }}
         image: "{{ .Values.observability.loki.image.name }}:{{ .Values.observability.loki.image.tag }}"

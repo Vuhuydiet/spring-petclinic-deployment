@@ -317,6 +317,10 @@ spec:
         operator: Exists
         effect: NoSchedule
       {{- end }}
+      securityContext:
+        runAsUser: 472
+        runAsGroup: 472
+        fsGroup: 472
       containers:
       - name: {{ .Values.observability.grafana.name }}
         image: "{{ .Values.observability.grafana.image.name }}:{{ .Values.observability.grafana.image.tag }}"

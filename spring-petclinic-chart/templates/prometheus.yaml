@@ -107,6 +107,10 @@ spec:
         operator: Exists
         effect: NoSchedule
       {{- end }}
+      securityContext:
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
       containers:
       - name: {{ .Values.observability.prometheus.name }}
         image: "{{ .Values.observability.prometheus.image.name }}:{{ .Values.observability.prometheus.image.tag }}"
