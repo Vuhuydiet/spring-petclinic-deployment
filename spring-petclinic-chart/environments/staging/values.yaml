@@ -1,21 +1,9 @@
 host: staging.devops.vuhuydiet.xyz
 
-# Observability configuration for staging environment
-observability:
-  useEmptyDirVolumes: false  # Use PVC for staging (persistent storage)
-  grafana:
-    serviceType: LoadBalancer  # Use LoadBalancer for staging
-
 configServer:
   image:
     tag: v0.0.12
 discoveryServer:
-  image:
-    tag: v0.0.12
-apiGateway:
-  image:
-    tag: v0.0.12
-adminServer:
   image:
     tag: v0.0.12
 services:
@@ -28,3 +16,15 @@ services:
   vetsService:
     image:
       tag: v0.0.12
+  apiGateway:
+    image:
+      tag: v0.0.12
+  adminServer:
+    image:
+      tag: v0.0.12
+
+# Observability configuration for staging environment
+observability:
+  useEmptyDirVolumes: false  # Use PVC for staging (persistent storage)
+  grafana:
+    serviceType: LoadBalancer  # Use LoadBalancer for staging

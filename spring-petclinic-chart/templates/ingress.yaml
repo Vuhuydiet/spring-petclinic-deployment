@@ -16,7 +16,7 @@ spec:
           service:
             name: api-gateway
             port:
-              number: {{ .Values.apiGateway.port }}
+              number: {{ .Values.services.apiGateway.port }}
   - host: admin.{{ .Values.host }}
     http:
       paths:
@@ -26,5 +26,5 @@ spec:
           service:
             name: admin-server
             port:
-              number: {{ .Values.adminServer.port }}
+              number: {{ .Values.services.adminServer.port }}
     
