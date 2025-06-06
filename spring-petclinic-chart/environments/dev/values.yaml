@@ -1,36 +1,34 @@
 host: dev.devops.vuhuydiet.xyz
-
 configServer:
   image:
-    tag: a15e5d0
+    tag: 3eb80f9
 discoveryServer:
   image:
-    tag: a15e5d0
+    tag: 3eb80f9
 apiGateway:
   image:
-    tag: a15e5d0
+    tag: 3eb80f9
 adminServer:
   image:
-    tag: a15e5d0
+    tag: 3eb80f9
 services:
   customersService:
     image:
-      tag: a15e5d0
+      tag: 3eb80f9
   visitsService:
     image:
-      tag: a15e5d0
+      tag: 3eb80f9
   vetsService:
     image:
-      tag: a15e5d0
-      
+      tag: 3eb80f9
 # Observability configuration for dev environment
 observability:
-  useEmptyDirVolumes: false  # Use PVC for persistent storage on DigitalOcean
+  useEmptyDirVolumes: false # Use PVC for persistent storage on DigitalOcean
   tolerateMemoryPressure: true
   prometheus:
-    storage: 4Gi  # Smaller size for dev
+    storage: 4Gi # Smaller size for dev
   grafana:
     serviceType: LoadBalancer
-    storage: 1Gi  # Smaller size for dev
+    storage: 1Gi # Smaller size for dev
   loki:
-    storage: 2Gi  # Smaller size for dev
+    storage: 2Gi # Smaller size for dev
