@@ -81,6 +81,13 @@ observability:
     serviceType: ClusterIP
     retention: 15d
     storage: 10Gi
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "250m"
+      limits:
+        memory: "1Gi"
+        cpu: "500m"
     
   grafana:
     name: grafana
@@ -93,6 +100,13 @@ observability:
     adminUser: admin
     adminPassword: admin123
     storage: 5Gi
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+      limits:
+        memory: "512Mi"
+        cpu: "250m"
     
   loki:
     name: loki
@@ -103,6 +117,13 @@ observability:
     targetPort: 3100
     serviceType: ClusterIP
     storage: 10Gi
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+      limits:
+        memory: "512Mi"
+        cpu: "250m"
     
   zipkin:
     name: zipkin
