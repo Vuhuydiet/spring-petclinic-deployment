@@ -23,7 +23,7 @@ services:
       tag: 594c9be
 # Observability configuration for dev environment
 observability:
-  useEmptyDirVolumes: false # Use PVC for persistent storage on DigitalOcean
+  useEmptyDirVolumes: true # Use PVC for persistent storage on DigitalOcean
   tolerateMemoryPressure: true
   prometheus:
     storage: 4Gi # Smaller size for dev
