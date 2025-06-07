@@ -1,26 +1,26 @@
 host: dev.devops.vuhuydiet.xyz
 configServer:
   image:
-    tag: 3eb80f9
+    tag: 1934df7
 discoveryServer:
   image:
-    tag: 3eb80f9
+    tag: 1934df7
 apiGateway:
   image:
-    tag: 3eb80f9
+    tag: 1934df7
 adminServer:
   image:
-    tag: 3eb80f9
+    tag: 1934df7
 services:
   customersService:
     image:
-      tag: 3eb80f9
+      tag: 1934df7
   visitsService:
     image:
-      tag: 3eb80f9
+      tag: 1934df7
   vetsService:
     image:
-      tag: 3eb80f9
+      tag: 1934df7
 # Observability configuration for dev environment
 observability:
   useEmptyDirVolumes: false # Use PVC for persistent storage on DigitalOcean
