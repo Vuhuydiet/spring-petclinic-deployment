@@ -173,8 +173,8 @@ data:
     providers:
       - name: 'default'
         orgId: 1
-        folder: 'General'
-        folderUid: ''
+        folder: 'PetClinic'
+        folderUid: 'petclinic-folder'
         type: file
         disableDeletion: false
         editable: true
