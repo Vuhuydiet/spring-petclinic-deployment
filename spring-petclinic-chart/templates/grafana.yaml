@@ -78,6 +78,54 @@ data:
         },
         {
           "id": 2,
+          "title": "Request Rate by Service",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "sum(rate(http_server_requests_seconds_count[5m])) by (job)",
+              "refId": "A",
+              "legendFormat": "{{ "{{" }}job{{ "}}" }}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "unit": "reqps"
+            }
+          },
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+        },
+        {
+          "id": 3,
+          "title": "HTTP Success Rate",
+          "type": "stat",
+          "targets": [
+            {
+              "expr": "sum(rate(http_server_requests_seconds_count{status=~\"2..\"}[5m]))",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "steps": [
+                  {"color": "red", "value": null},
+                  {"color": "yellow", "value": 1},
+                  {"color": "green", "value": 10}
+                ]
+              },
+              "unit": "reqps"
+            }
+          },
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+        },
+        {
+          "id": 4,
           "title": "HTTP Error Rate",
           "type": "stat",
           "targets": [
@@ -101,31 +149,10 @@ data:
               "unit": "reqps"
             }
           },
-          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
         },
         {
-          "id": 3,
-          "title": "Request Rate by Service",
-          "type": "timeseries",
-          "targets": [
-            {
-              "expr": "sum(rate(http_server_requests_seconds_count[5m])) by (job)",
-              "refId": "A",
-              "legendFormat": "{{ "{{" }}job{{ "}}" }}"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "unit": "reqps"
-            }
-          },
-          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
-        },
-        {
-          "id": 4,
+          "id": 5,
           "title": "JVM Memory Usage",
           "type": "timeseries",
           "targets": [
@@ -143,7 +170,7 @@ data:
               "unit": "bytes"
             }
           },
-          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 16}
         }
       ],
       "time": {
