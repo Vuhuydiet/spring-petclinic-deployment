@@ -67,7 +67,7 @@ services:
 # Observability Stack Configuration
 observability:
   # Use emptyDir volumes for development/testing to avoid PVC issues
-  useEmptyDirVolumes: true
+  useEmptyDirVolumes: false
   tolerateMemoryPressure: false
   prometheus:
     name: prometheus
