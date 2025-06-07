@@ -21,8 +21,6 @@ spec:
         ports:
         - containerPort: {{ .Values.configServer.port }}
         env:
-        - name: SPRING_PROFILES_ACTIVE
-          value: "kubernetes"
         # Observability configuration
         - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
           value: "health,info,prometheus,metrics"
