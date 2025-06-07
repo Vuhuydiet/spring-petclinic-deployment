@@ -8,12 +8,14 @@ data:
     datasources:
       - name: Prometheus
         type: prometheus
+        uid: prometheus
         access: proxy
         url: http://{{ .Values.observability.prometheus.name }}:{{ .Values.observability.prometheus.port }}
         isDefault: true
         
       - name: Loki
         type: loki
+        uid: loki
         access: proxy
         url: http://{{ .Values.observability.loki.name }}:{{ .Values.observability.loki.port }}
         jsonData:
@@ -34,6 +36,7 @@ data:
         
       - name: Zipkin
         type: zipkin
+        uid: zipkin
         access: proxy
         url: http://{{ .Values.observability.zipkin.name }}:{{ .Values.observability.zipkin.port }}
         jsonData:
@@ -76,7 +79,11 @@ data:
           "targets": [
             {
               "expr": "sum(rate(http_server_requests_seconds_count[5m]))",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "fieldConfig": {
@@ -104,7 +111,11 @@ data:
             {
               "expr": "sum(rate(http_server_requests_seconds_count[5m])) by (job)",
               "refId": "A",
-              "legendFormat": "{{ "{{" }}job{{ "}}" }}"
+              "legendFormat": "{{ "{{" }}job{{ "}}" }}",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "fieldConfig": {
@@ -124,7 +135,11 @@ data:
           "targets": [
             {
               "expr": "sum(rate(http_server_requests_seconds_count{status=~\"2..\"}[5m]))",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "fieldConfig": {
@@ -151,7 +166,11 @@ data:
           "targets": [
             {
               "expr": "sum(rate(http_server_requests_seconds_count{status=~\"5..\"}[5m]))",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "fieldConfig": {
@@ -179,7 +198,11 @@ data:
             {
               "expr": "sum(jvm_memory_used_bytes) by (job)",
               "refId": "A",
-              "legendFormat": "{{ "{{" }}job{{ "}}" }}"
+              "legendFormat": "{{ "{{" }}job{{ "}}" }}",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "fieldConfig": {
@@ -204,10 +227,10 @@ data:
             "name": "service",
             "type": "query",
             "datasource": {
-              "type": "loki",
-              "uid": "loki"
+              "type": "prometheus",
+              "uid": "prometheus"
             },
-            "query": "label_values(application)",
+            "query": "label_values(job)",
             "regex": "",
             "allValue": ".*",
             "includeAll": true,
