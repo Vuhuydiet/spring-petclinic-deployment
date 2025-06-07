@@ -22,12 +22,12 @@ data:
           maxLines: 1000
           derivedFields:
             - name: TraceID
-              matcherRegex: "\\[([a-f0-9]{16}),([a-f0-9]*?)\\]"
+              matcherRegex: "\\[([0-9a-f]{16,32}),([0-9a-f]{16,32})\\]"
               url: "http://{{ .Values.observability.zipkin.name }}:{{ .Values.observability.zipkin.port }}/zipkin/traces/$1"
               datasourceUid: zipkin
               urlDisplayLabel: "View Trace"
             - name: SpanID  
-              matcherRegex: "\\[([a-f0-9]*?),([a-f0-9]{16})\\]"
+              matcherRegex: "\\[([0-9a-f]{16,32}),([0-9a-f]{16,32})\\]"
               url: "http://{{ .Values.observability.zipkin.name }}:{{ .Values.observability.zipkin.port }}/zipkin/traces/$1/$2"
               datasourceUid: zipkin
               urlDisplayLabel: "View Span"
