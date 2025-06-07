@@ -16,6 +16,21 @@ data:
         type: loki
         access: proxy
         url: http://{{ .Values.observability.loki.name }}:{{ .Values.observability.loki.port }}
+        jsonData:
+          maxLines: 1000
+          derivedFields:
+            - name: TraceID
+              matcherRegex: "\\[([a-f0-9]{16}),([a-f0-9]*?)\\]"
+              url: "http://{{ .Values.observability.zipkin.name }}:{{ .Values.observability.zipkin.port }}/zipkin/traces/$1"
+              datasourceUid: zipkin
+              urlDisplayLabel: "View Trace"
+            - name: SpanID  
+              matcherRegex: "\\[([a-f0-9]*?),([a-f0-9]{16})\\]"
+              url: "http://{{ .Values.observability.zipkin.name }}:{{ .Values.observability.zipkin.port }}/zipkin/traces/$1/$2"
+              datasourceUid: zipkin
+              urlDisplayLabel: "View Span"
+          timeout: 60
+          httpHeaderName1: X-Scope-OrgID
         
       - name: Zipkin
         type: zipkin
@@ -24,14 +39,19 @@ data:
         jsonData:
           tracesToLogs:
             datasourceUid: loki
-            tags: ['job', 'instance', 'pod', 'namespace']
-            mappedTags: [{ key: 'service.name', value: 'service' }]
-            mapTagNamesEnabled: false
-            spanStartTimeShift: '1h'
+            tags: ['job', 'instance', 'pod', 'namespace', 'application']
+            mappedTags: [
+              { key: 'service.name', value: 'application' },
+              { key: 'k8s.pod.name', value: 'pod' },
+              { key: 'k8s.namespace.name', value: 'namespace' }
+            ]
+            mapTagNamesEnabled: true
+            spanStartTimeShift: '-1h'
             spanEndTimeShift: '1h'
-            filterByTraceID: false
+            filterByTraceID: true
             filterBySpanID: false
             lokiSearch: true
+            customQuery: true
 
 ---
 apiVersion: v1
@@ -180,6 +200,268 @@ data:
       "timepicker": {},
       "templating": {
         "list": []
+      },
+      "annotations": {
+        "list": []
+      },
+      "refresh": "5s",
+      "schemaVersion": 30,
+      "version": 1
+    }
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.observability.grafana.name }}-logs-dashboard
+data:
+  logs-dashboard.json: |
+    {
+      "id": null,
+      "title": "Spring PetClinic Logs",
+      "tags": ["petclinic", "logs"],
+      "style": "dark",
+      "timezone": "browser",
+      "editable": true,
+      "graphTooltip": 0,
+      "panels": [
+        {
+          "id": 1,
+          "title": "Log Stream by Service",
+          "type": "logs",
+          "targets": [
+            {
+              "expr": "{app=~\"$service\"}",
+              "refId": "A",
+              "datasource": {
+                "type": "loki",
+                "uid": "loki"
+              }
+            }
+          ],
+          "gridPos": {"h": 12, "w": 24, "x": 0, "y": 0},
+          "options": {
+            "showTime": true,
+            "showLabels": true,
+            "showCommonLabels": false,
+            "wrapLogMessage": true,
+            "prettifyLogMessage": true,
+            "enableLogDetails": true,
+            "dedupStrategy": "exact",
+            "sortOrder": "Descending"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "vis": false
+                }
+              },
+              "color": {
+                "mode": "palette-classic"
+              }
+            }
+          }
+        },
+        {
+          "id": 2,
+          "title": "Log Levels Distribution",
+          "type": "stat",
+          "targets": [
+            {
+              "expr": "sum by (app) (count_over_time({app=~\".+\"} [1h]))",
+              "refId": "A",
+              "datasource": {
+                "type": "loki",
+                "uid": "loki"
+              }
+            }
+          ],
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "unit": "short",
+              "thresholds": {
+                "steps": [
+                  {"color": "green", "value": null},
+                  {"color": "yellow", "value": 100},
+                  {"color": "red", "value": 1000}
+                ]
+              }
+            }
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "center",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "values": false,
+              "calcs": ["lastNotNull"],
+              "fields": ""
+            }
+          }
+        },
+        {
+          "id": 3,
+          "title": "Errors and Warnings",
+          "type": "logs",
+          "targets": [
+            {
+              "expr": "{app=~\".+\"} |~ \"ERROR|WARN\"",
+              "refId": "A",
+              "datasource": {
+                "type": "loki",
+                "uid": "loki"
+              }
+            }
+          ],
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+          "options": {
+            "showTime": true,
+            "showLabels": true,
+            "showCommonLabels": false,
+            "wrapLogMessage": true,
+            "prettifyLogMessage": true,
+            "enableLogDetails": true,
+            "dedupStrategy": "exact",
+            "sortOrder": "Descending"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "vis": false
+                }
+              },
+              "color": {
+                "mode": "palette-classic"
+              }
+            }
+          }
+        },
+        {
+          "id": 4,
+          "title": "Log Volume by Service",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "sum by (app) (rate({app=~\".+\"} [1m]))",
+              "refId": "A",
+              "datasource": {
+                "type": "loki",
+                "uid": "loki"
+              }
+            }
+          ],
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20},
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "unit": "logs/sec",
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "barAlignment": 0,
+                "lineWidth": 1,
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "spanNulls": false,
+                "insertNulls": false,
+                "showPoints": "never",
+                "pointSize": 5,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "axisPlacement": "auto",
+                "axisLabel": "",
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "vis": false
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": 5,
+          "title": "Traced Requests",
+          "type": "logs",
+          "targets": [
+            {
+              "expr": "{app=~\".+\"} |~ \"\\\\[[a-f0-9]{16},[a-f0-9]*\\\\]\"",
+              "refId": "A",
+              "datasource": {
+                "type": "loki",
+                "uid": "loki"
+              }
+            }
+          ],
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20},
+          "options": {
+            "showTime": true,
+            "showLabels": true,
+            "showCommonLabels": false,
+            "wrapLogMessage": true,
+            "prettifyLogMessage": true,
+            "enableLogDetails": true,
+            "dedupStrategy": "exact",
+            "sortOrder": "Descending"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "vis": false
+                }
+              },
+              "color": {
+                "mode": "palette-classic"
+              }
+            }
+          }
+        }
+      ],
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "templating": {
+        "list": [
+          {
+            "name": "service",
+            "type": "query",
+            "datasource": {
+              "type": "loki",
+              "uid": "loki"
+            },
+            "query": "label_values(app)",
+            "refresh": 1,
+            "includeAll": true,
+            "allValue": ".+",
+            "multi": true
+          }
+        ]
       },
       "annotations": {
         "list": []
