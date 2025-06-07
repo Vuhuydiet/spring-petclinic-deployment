@@ -27,4 +27,14 @@ spec:
             name: admin-server
             port:
               number: {{ .Values.services.adminServer.port }}
+  - host: grafana.{{ .Values.host }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.observability.grafana.name }}
+            port:
+              number: {{ .Values.observability.grafana.port }}
     

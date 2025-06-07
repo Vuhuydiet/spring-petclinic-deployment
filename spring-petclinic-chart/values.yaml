@@ -87,7 +87,7 @@ observability:
       tag: 10.0.0
     port: 3000
     targetPort: 3000
-    serviceType: LoadBalancer
+    serviceType: ClusterIP
     adminUser: admin
     adminPassword: admin123
     storage: 2Gi
