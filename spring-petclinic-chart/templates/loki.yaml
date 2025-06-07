@@ -8,9 +8,32 @@ data:
     
     server:
       http_listen_port: 3100
-      grpc_listen_port: 9096
-    
-    common:
+      grpc_listen_port: 9096          # Add pod name as a label
+          - source_labels: [__meta_kubernetes_pod_name]
+            action: replace
+            target_label: pod_name
+          # Add container name as a label
+          - source_labels: [__meta_kubernetes_pod_container_name]
+            action: replace
+            target_label: container_name
+          # Extract app label and use it as the main app label
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            action: replace
+            target_label: app
+        pipeline_stages:
+          # Parse the Spring Boot log format
+          - regex:
+              expression: '(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})\s+\[(?P<thread>[^\]]+)\]\s+(?P<level>\w+)\s+\[(?P<trace_id>[^,]*),(?P<span_id>[^\]]*)\]\s+(?P<logger>[^\s]+)\s+-\s+(?P<message>.*)'
+          # Set log level
+          - labels:
+              level:
+              trace_id:
+              span_id:
+              logger:
+          # Parse timestamp
+          - timestamp:
+              source: timestamp
+              format: '2006-01-02 15:04:05.000'   common:
       path_prefix: /loki
       storage:
         filesystem:
@@ -208,17 +231,129 @@ data:
         kubernetes_sd_configs:
           - role: pod
         relabel_configs:
-          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+          # Only scrape pods in the spring-petclinic namespace
+          - source_labels: [__meta_kubernetes_namespace]
             action: keep
-            regex: true
+            regex: spring-petclinic
+          # Map all pod labels to Loki labels
           - action: labelmap
             regex: __meta_kubernetes_pod_label_(.+)
+          # Add namespace as a label
           - source_labels: [__meta_kubernetes_namespace]
             action: replace
-            target_label: kubernetes_namespace
+            target_label: namespace
+          # Add pod name as a label
           - source_labels: [__meta_kubernetes_pod_name]
             action: replace
-            target_label: kubernetes_pod_name
+            target_label: pod_name
+          # Add container name as a label
           - source_labels: [__meta_kubernetes_pod_container_name]
             action: replace
             target_label: container_name
+          # Extract app label and use it as the main app label  
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            action: replace
+            target_label: app
+        pipeline_stages:
+          # Parse the Spring Boot log format
+          - regex:
+              expression: '(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})\s+\[(?P<thread>[^\]]+)\]\s+(?P<level>\w+)\s+\[(?P<trace_id>[^,]*),(?P<span_id>[^\]]*)\]\s+(?P<logger>[^\s]+)\s+-\s+(?P<message>.*)'
+          # Set extracted fields as labels
+          - labels:
+              level:
+              trace_id:
+              span_id:
+              logger:
+          # Parse timestamp
+          - timestamp:
+              source: timestamp
+              format: '2006-01-02 15:04:05.000'
+
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ .Values.observability.loki.name }}-promtail
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.observability.loki.name }}-promtail
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.observability.loki.name }}-promtail
+    spec:
+      serviceAccountName: {{ .Values.observability.loki.name }}-promtail
+      {{- if .Values.observability.tolerateMemoryPressure }}
+      tolerations:
+      - key: node.kubernetes.io/memory-pressure
+        operator: Exists
+        effect: NoSchedule
+      {{- end }}
+      containers:
+      - name: promtail
+        image: grafana/promtail:2.9.0
+        args:
+        - -config.file=/etc/promtail/config.yml
+        - -client.url=http://{{ .Values.observability.loki.name }}:{{ .Values.observability.loki.port }}/loki/api/v1/push
+        volumeMounts:
+        - name: config
+          mountPath: /etc/promtail
+        - name: varlog
+          mountPath: /var/log
+          readOnly: true
+        - name: varlibdockercontainers
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+        env:
+        - name: HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        securityContext:
+          runAsUser: 0
+      volumes:
+      - name: config
+        configMap:
+          name: {{ .Values.observability.loki.name }}-promtail-config
+      - name: varlog
+        hostPath:
+          path: /var/log
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.observability.loki.name }}-promtail
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Values.observability.loki.name }}-promtail
+rules:
+- apiGroups: [""]
+  resources:
+  - nodes
+  - nodes/proxy
+  - services
+  - endpoints
+  - pods
+  verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Values.observability.loki.name }}-promtail
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Values.observability.loki.name }}-promtail
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.observability.loki.name }}-promtail
+  namespace: {{ .Release.Namespace }}
