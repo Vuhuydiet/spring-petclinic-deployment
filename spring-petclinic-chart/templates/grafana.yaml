@@ -199,7 +199,29 @@ data:
       },
       "timepicker": {},
       "templating": {
-        "list": []
+        "list": [
+          {
+            "name": "service",
+            "type": "query",
+            "datasource": {
+              "type": "loki",
+              "uid": "loki"
+            },
+            "query": "label_values(application)",
+            "regex": "",
+            "allValue": ".*",
+            "includeAll": true,
+            "multi": true,
+            "current": {
+              "selected": true,
+              "text": "All",
+              "value": "$__all"
+            },
+            "options": [],
+            "refresh": 1,
+            "sort": 1
+          }
+        ]
       },
       "annotations": {
         "list": []
@@ -231,7 +253,7 @@ data:
           "type": "logs",
           "targets": [
             {
-              "expr": "{app=~\"$service\"}",
+              "expr": "{application=~\"$service|.*$service.*\"}",
               "refId": "A",
               "datasource": {
                 "type": "loki",
@@ -271,7 +293,7 @@ data:
           "type": "stat",
           "targets": [
             {
-              "expr": "sum by (app) (count_over_time({app=~\".+\"} [1h]))",
+              "expr": "sum by (application) (count_over_time({application=~\".+\"} [1h]))",
               "refId": "A",
               "datasource": {
                 "type": "loki",
@@ -313,7 +335,7 @@ data:
           "type": "logs",
           "targets": [
             {
-              "expr": "{app=~\".+\"} |~ \"ERROR|WARN\"",
+              "expr": "{application=~\".+\"} |~ \"ERROR|WARN\"",
               "refId": "A",
               "datasource": {
                 "type": "loki",

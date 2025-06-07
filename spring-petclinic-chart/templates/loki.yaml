@@ -8,32 +8,9 @@ data:
     
     server:
       http_listen_port: 3100
-      grpc_listen_port: 9096          # Add pod name as a label
-          - source_labels: [__meta_kubernetes_pod_name]
-            action: replace
-            target_label: pod_name
-          # Add container name as a label
-          - source_labels: [__meta_kubernetes_pod_container_name]
-            action: replace
-            target_label: container_name
-          # Extract app label and use it as the main app label
-          - source_labels: [__meta_kubernetes_pod_label_app]
-            action: replace
-            target_label: app
-        pipeline_stages:
-          # Parse the Spring Boot log format
-          - regex:
-              expression: '(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})\s+\[(?P<thread>[^\]]+)\]\s+(?P<level>\w+)\s+\[(?P<trace_id>[^,]*),(?P<span_id>[^\]]*)\]\s+(?P<logger>[^\s]+)\s+-\s+(?P<message>.*)'
-          # Set log level
-          - labels:
-              level:
-              trace_id:
-              span_id:
-              logger:
-          # Parse timestamp
-          - timestamp:
-              source: timestamp
-              format: '2006-01-02 15:04:05.000'   common:
+      grpc_listen_port: 9096
+    
+    common:
       path_prefix: /loki
       storage:
         filesystem:
@@ -235,9 +212,6 @@ data:
           - source_labels: [__meta_kubernetes_namespace]
             action: keep
             regex: spring-petclinic
-          # Map all pod labels to Loki labels
-          - action: labelmap
-            regex: __meta_kubernetes_pod_label_(.+)
           # Add namespace as a label
           - source_labels: [__meta_kubernetes_namespace]
             action: replace
@@ -245,29 +219,57 @@ data:
           # Add pod name as a label
           - source_labels: [__meta_kubernetes_pod_name]
             action: replace
-            target_label: pod_name
+            target_label: pod
           # Add container name as a label
           - source_labels: [__meta_kubernetes_pod_container_name]
             action: replace
-            target_label: container_name
-          # Extract app label and use it as the main app label  
+            target_label: container
+          # Extract service name from pod name (e.g., discovery-server-565fd8c6b-7297b -> discovery-server)
+          - source_labels: [__meta_kubernetes_pod_name]
+            action: replace
+            target_label: service
+            regex: '([^-]+-[^-]+)-.*'
+            replacement: '${1}'
+          # Try to get app label from pod labels
           - source_labels: [__meta_kubernetes_pod_label_app]
             action: replace
-            target_label: app
+            target_label: application
+          # If app label is empty, use the service name extracted from pod name
+          - source_labels: [application, service]
+            action: replace
+            target_label: application
+            regex: '^$;(.+)'
+            replacement: '${1}'
+          # Ensure we have a fallback application name
+          - source_labels: [application]
+            action: replace
+            target_label: application
+            regex: '^$'
+            replacement: 'unknown'
         pipeline_stages:
-          # Parse the Spring Boot log format
+          # First try to parse Spring Boot log format
           - regex:
               expression: '(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})\s+\[(?P<thread>[^\]]+)\]\s+(?P<level>\w+)\s+\[(?P<trace_id>[^,]*),(?P<span_id>[^\]]*)\]\s+(?P<logger>[^\s]+)\s+-\s+(?P<message>.*)'
-          # Set extracted fields as labels
+          # If the above doesn't match, try a simpler format
+          - regex:
+              expression: '(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}).*?(?P<level>INFO|DEBUG|WARN|ERROR|TRACE).*?(?P<message>.*)'
+          # Extract service name from logger if available
+          - regex:
+              expression: '.*\.(?P<service_from_logger>discovery|config|gateway|customers|vets|visits|admin).*'
+              source: logger
+          # Set labels from extracted fields
           - labels:
               level:
               trace_id:
               span_id:
-              logger:
+              service_from_logger:
           # Parse timestamp
           - timestamp:
               source: timestamp
               format: '2006-01-02 15:04:05.000'
+              fallback_formats:
+                - '2006-01-02T15:04:05.000Z'
+                - RFC3339
 
 ---
 apiVersion: apps/v1
