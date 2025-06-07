@@ -6,12 +6,6 @@ configServer:
 discoveryServer:
   image:
     tag: v0.0.12
-apiGateway:
-  image:
-    tag: v0.0.12
-adminServer:
-  image:
-    tag: v0.0.12
 services:
   customersService:
     image:
@@ -22,6 +16,12 @@ services:
   vetsService:
     image:
       tag: v0.0.12
+  apiGateway:
+    image:
+      tag: v0.0.12
+  adminServer:
+    image:
+      tag: v0.0.12
 
 # Observability configuration for staging environment
 observability:
@@ -30,7 +30,6 @@ observability:
   prometheus:
     storage: 6Gi  # Medium size for staging
   grafana:
-    serviceType: LoadBalancer
     storage: 2Gi  # Standard size for staging
   loki:
     storage: 4Gi  # Medium size for staging

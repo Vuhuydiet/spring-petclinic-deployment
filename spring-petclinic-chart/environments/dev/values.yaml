@@ -5,12 +5,7 @@ configServer:
 discoveryServer:
   image:
     tag: 594c9be
-apiGateway:
-  image:
-    tag: 594c9be
-adminServer:
-  image:
-    tag: 594c9be
+
 services:
   customersService:
     image:
@@ -21,6 +16,12 @@ services:
   vetsService:
     image:
       tag: 594c9be
+  apiGateway:
+    image:
+      tag: 594c9be
+  adminServer:
+    image:
+      tag: 594c9be
 # Observability configuration for dev environment
 observability:
   useEmptyDirVolumes: true # Use PVC for persistent storage on DigitalOcean
@@ -28,7 +29,6 @@ observability:
   prometheus:
     storage: 4Gi # Smaller size for dev
   grafana:
-    serviceType: LoadBalancer
     storage: 1Gi # Smaller size for dev
   loki:
     storage: 2Gi # Smaller size for dev
