@@ -1,35 +1,39 @@
 host: staging.devops.vuhuydiet.xyz
-
 configServer:
   image:
-    tag: v0.0.12
+    tag: v2.0.0
 discoveryServer:
   image:
-    tag: v0.0.12
+    tag: v2.0.0
 services:
   customersService:
     image:
-      tag: v0.0.12
+      tag: v2.0.0
   visitsService:
     image:
-      tag: v0.0.12
+      tag: v2.0.0
   vetsService:
     image:
-      tag: v0.0.12
+      tag: v2.0.0
   apiGateway:
     image:
       tag: v0.0.12
   adminServer:
     image:
       tag: v0.0.12
-
 # Observability configuration for staging environment
 observability:
-  useEmptyDirVolumes: false  # Use PVC for persistent storage on DigitalOcean
+  useEmptyDirVolumes: false # Use PVC for persistent storage on DigitalOcean
   tolerateMemoryPressure: true
   prometheus:
-    storage: 6Gi  # Medium size for staging
+    storage: 6Gi # Medium size for staging
   grafana:
-    storage: 2Gi  # Standard size for staging
+    storage: 2Gi # Standard size for staging
   loki:
-    storage: 4Gi  # Medium size for staging
+    storage: 4Gi # Medium size for staging
+apiGateway:
+  image:
+    tag: v2.0.0
+adminServer:
+  image:
+    tag: v2.0.0
