@@ -1,20 +1,20 @@
 host: dev.devops.vuhuydiet.xyz
 configServer:
   image:
-    tag: f914cfa
+    tag: 93bfa31
 discoveryServer:
   image:
-    tag: f914cfa
+    tag: 93bfa31
 services:
   customersService:
     image:
-      tag: f914cfa
+      tag: 93bfa31
   visitsService:
     image:
-      tag: f914cfa
+      tag: 93bfa31
   vetsService:
     image:
-      tag: f914cfa
+      tag: 93bfa31
   apiGateway:
     image:
       tag: f914cfa
@@ -31,3 +31,9 @@ observability:
     storage: 1Gi # Smaller size for dev
   loki:
     storage: 2Gi # Smaller size for dev
+apiGateway:
+  image:
+    tag: 93bfa31
+adminServer:
+  image:
+    tag: 93bfa31
