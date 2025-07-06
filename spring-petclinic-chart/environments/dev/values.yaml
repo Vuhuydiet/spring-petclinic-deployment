@@ -1,20 +1,20 @@
 host: dev.devops.vuhuydiet.xyz
 configServer:
   image:
-    tag: 93bfa31
+    tag: 301499a
 discoveryServer:
   image:
-    tag: 93bfa31
+    tag: 301499a
 services:
   customersService:
     image:
-      tag: 93bfa31
+      tag: 301499a
   visitsService:
     image:
-      tag: 93bfa31
+      tag: 301499a
   vetsService:
     image:
-      tag: 93bfa31
+      tag: 301499a
   apiGateway:
     image:
       tag: f914cfa
@@ -33,7 +33,7 @@ observability:
     storage: 2Gi # Smaller size for dev
 apiGateway:
   image:
-    tag: 93bfa31
+    tag: 301499a
 adminServer:
   image:
-    tag: 93bfa31
+    tag: 301499a
